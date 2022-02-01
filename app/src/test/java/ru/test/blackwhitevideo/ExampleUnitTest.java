@@ -4,8 +4,6 @@ import junit.framework.TestCase;
 import org.junit.Test;
 import ru.test.blackwhitevideo.model.ImageMatrix;
 
-import static org.junit.Assert.*;
-
 /**
  * Example local unit test, which will execute on the development machine (host).
  *
@@ -14,7 +12,7 @@ import static org.junit.Assert.*;
 public class ExampleUnitTest {
     @Test
     public void testMatrix() {
-        int[] pixels = {
+        short[] pixels = {
                 255, 255, 255, 10, 10, 10,
                 255, 255, 255, 10, 10, 10,
                 255, 255, 255, 10, 10, 10,
@@ -42,7 +40,8 @@ public class ExampleUnitTest {
                 0, 255, 255, 0
         };
 
-        int[] filteredMatrix = imageMatrix.colorMatrixToBlackAndWhite().getMatrix();
+        imageMatrix.colorMatrixToBlackAndWhite();
+        short[] filteredMatrix = imageMatrix.getMatrix();
         for (int i = 0; i < filteredMatrix.length; i++) {
             TestCase.assertEquals(expectedResult[i], filteredMatrix[i]);
         }

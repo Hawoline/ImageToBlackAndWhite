@@ -1,13 +1,8 @@
 package ru.test.blackwhitevideo;
 
-import android.app.Instrumentation;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
@@ -15,7 +10,6 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import androidx.core.content.res.ResourcesCompat;
 import ru.test.blackwhitevideo.model.ImageMatrix;
 
 import java.io.IOException;
@@ -58,22 +52,20 @@ public class MainActivity extends AppCompatActivity {
 
         bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
 
-        int[] reds = new int[pixelsCount];
-        int[] greens = new int[pixelsCount];
-        int[] blues = new int[pixelsCount];
+        short[] reds = new short[pixelsCount];
+        short[] greens = new short[pixelsCount];
+        short[] blues = new short[pixelsCount];
 
         for (int i = 0; i < pixelsCount; i++) {
-            reds[i] = Color.red(pixels[i]);
-            greens[i] = Color.green(pixels[i]);
-            blues[i] = Color.blue(pixels[i]);
+            reds[i] = (short) Color.red(pixels[i]);
+            greens[i] = (short) Color.green(pixels[i]);
+            blues[i] = (short) Color.blue(pixels[i]);
         }
 
         int newPixelsWidth = bitmap.getWidth() - 2;
         int newPixelsHeight = bitmap.getHeight() - 2;
 
-        ImageMatrix redPixelsMatrix = new ImageMatrix(reds, bitmap.getWidth(), bitmap.getHeight());
-        ImageMatrix greenPixelsMatrix = new ImageMatrix(greens, bitmap.getWidth(), bitmap.getHeight());
-        ImageMatrix bluePixelsMatrix = new ImageMatrix(blues, bitmap.getWidth(), bitmap.getHeight());
+        ImageMatrix oneColorImageMatrix = new ImageMatrix(reds, bitmap.getWidth(), bitmap.getHeight());
 
         int[] filter = {
                 1, 2, 1,
@@ -81,22 +73,29 @@ public class MainActivity extends AppCompatActivity {
                 -1, -2, -1
         };
 
-        redPixelsMatrix.setFilter(filter);
-        greenPixelsMatrix.setFilter(filter);
-        bluePixelsMatrix.setFilter(filter);
+        oneColorImageMatrix.setFilter(filter);
 
-        int[] newReds = redPixelsMatrix.colorMatrixToBlackAndWhite().getMatrix();
-        int[] newGreens = greenPixelsMatrix.colorMatrixToBlackAndWhite().getMatrix();
-        int[] newBlues = bluePixelsMatrix.colorMatrixToBlackAndWhite().getMatrix();
+        oneColorImageMatrix.colorMatrixToBlackAndWhite();
+        reds = oneColorImageMatrix.getMatrix();
 
-        int[] newPixels = new int[newReds.length];
-        for (int i = 0; i < newPixels.length; i++) {
-            newPixels[i] = Color.rgb(newReds[i], newGreens[i], newBlues[i]);
+        oneColorImageMatrix.setImageMatrix(greens, bitmap.getWidth(), bitmap.getHeight());
+        oneColorImageMatrix.colorMatrixToBlackAndWhite();
+
+        greens = oneColorImageMatrix.getMatrix();
+        oneColorImageMatrix.setImageMatrix(blues, bitmap.getWidth(), bitmap.getHeight());
+        oneColorImageMatrix.colorMatrixToBlackAndWhite();
+
+        blues = oneColorImageMatrix.getMatrix();
+        oneColorImageMatrix = null;
+        
+        pixels = new int[reds.length];
+        for (int i = 0; i < pixels.length; i++) {
+            pixels[i] = Color.rgb(reds[i], greens[i], blues[i]);
         }
 
-        Bitmap filteredImageBitmap = Bitmap.createBitmap(newPixelsWidth, newPixelsHeight, Bitmap.Config.ARGB_8888);
-        filteredImageBitmap.setPixels(newPixels, 0, filteredImageBitmap.getWidth(), 0, 0, newPixelsWidth, newPixelsHeight);
-        mFilteredImageView.setImageBitmap(filteredImageBitmap);
+        bitmap = Bitmap.createBitmap(newPixelsWidth, newPixelsHeight, Bitmap.Config.ARGB_8888);
+        bitmap.setPixels(pixels, 0, bitmap.getWidth(), 0, 0, newPixelsWidth, newPixelsHeight);
+        mFilteredImageView.setImageBitmap(bitmap);
     }
 
     private void findViews() {

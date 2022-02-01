@@ -1,18 +1,18 @@
 package ru.test.blackwhitevideo.model;
 
 public class ImageMatrix {
-    private int[] matrix;
+    private short[] matrix;
     private int width;
     private int height;
     private int[] filter;
 
-    public ImageMatrix(int[] matrix, int width, int height) {
+    public ImageMatrix(short[] matrix, int width, int height) {
         this.matrix = matrix;
         this.width = width;
         this.height = height;
     }
 
-    public ImageMatrix colorMatrixToBlackAndWhite() {
+    public void colorMatrixToBlackAndWhite() {
         if (filter == null) {
             throw new NullPointerException("You must set filter for image matrix");
         }
@@ -23,7 +23,7 @@ public class ImageMatrix {
             throw new IllegalArgumentException("Matrix must have width and height larger than 2");
         }
 
-        int[] newMatrix = new int[newWidth * newHeight];
+        short[] newMatrix = new short[newWidth * newHeight];
         for (int y = 0; y < newHeight; y++) {
             for (int x = 0; x < newWidth; x++) {
                 int currentRow = y * width;
@@ -34,11 +34,10 @@ public class ImageMatrix {
                     newColorValue += filter[i] * matrix[currentRow + width * countOfNextRow + x + countOfNextColumn];
                 }
 
-                newMatrix[y * newWidth + x] = fixOutOfRangeRGBValue(newColorValue);
+                newMatrix[y * newWidth + x] = (short) fixOutOfRangeRGBValue(newColorValue);
             }
         }
-
-        return new ImageMatrix(newMatrix, newWidth, newHeight);
+        setImageMatrix(newMatrix, newWidth, newHeight);
     }
 
     private int fixOutOfRangeRGBValue(int value) {
@@ -52,16 +51,16 @@ public class ImageMatrix {
         return value;
     }
 
-    public void setImageMatrix(int[] matrix, int width, int height) {
+    public void setImageMatrix(short[] matrix, int width, int height) {
         setMatrix(matrix);
         setWidth(width);
         setHeight(height);
     }
-    public int[] getMatrix() {
+    public short[] getMatrix() {
         return matrix;
     }
 
-    private void setMatrix(int[] matrix) {
+    private void setMatrix(short[] matrix) {
         if (matrix.length > 0)
             this.matrix = matrix;
     }
